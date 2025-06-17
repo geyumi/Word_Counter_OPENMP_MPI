@@ -10,17 +10,21 @@ typedef struct {
     char word[MAX_WORD_LEN];
     int count;
 } WordCount;
+// wordCount will store the word with its count
 
-WordCount* wordList = NULL;  // pointer to dynamically allocated array
+WordCount* wordList = NULL;  // wordlist is a pointer to dynamically allocated array 
 int wordCount = 0;
-int capacity = 1000; // initial capacity (can start with a smaller or bigger number)
+int capacity = 1000; // initial capacity of the array
 
 void cleanWord(char* word) {
     int i, j = 0;
     char temp[MAX_WORD_LEN];
     for (i = 0; word[i] != '\0'; i++) {
         if (isalpha(word[i])) {
-            temp[j++] = tolower(word[i]);
+            char lowerChar = tolower(word[i]); 
+            temp[j] = lowerChar;               
+            j++;                               
+
         }
     }
     temp[j] = '\0';
@@ -36,26 +40,26 @@ void addWord(char* word) {
         }
     }
 
-    // If new word and array full, grow the array
+    // If new word came and array is full then we have to expand the array
     if (wordCount == capacity) {
-        capacity *= 2; // double the capacity
+        capacity *= 2; // double the capacity of the array
         WordCount* temp = realloc(wordList, capacity * sizeof(WordCount));
         if (temp == NULL) {
             printf("Memory allocation failed!\n");
-            free(wordList);
+            free(wordList);  //free that allocated space
             exit(1);
         }
         wordList = temp;
     }
 
-    // Add new word
+    // Add new word to the list if that is not exists
     strcpy(wordList[wordCount].word, word);
     wordList[wordCount].count = 1;
     wordCount++;
 }
 
 int main() {
-    wordList = malloc(capacity * sizeof(WordCount));
+    wordList = malloc(capacity * sizeof(WordCount));    //dynamically allocating memory using a pointer
     if (wordList == NULL) {
         printf("Memory allocation failed!\n");
         return 1;
