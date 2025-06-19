@@ -13,14 +13,16 @@ typedef struct {
 // wordCount will store the word with its count
 
 WordCount* wordList = NULL;  // wordlist is a pointer to dynamically allocated array 
-int wordCount = 0;
-int capacity = 1000; // initial capacity of the array
+int wordCount = 0; 
+int capacity = 1000; // initial capacity of the dynamic array
 
+
+//cleaning the text file ---> convert all in to lower case
 void cleanWord(char* word) {
     int i, j = 0;
-    char temp[MAX_WORD_LEN];
+    char temp[MAX_WORD_LEN];      // using a new temporary array for storing the cleaned word
     for (i = 0; word[i] != '\0'; i++) {
-        if (isalpha(word[i])) {
+        if (isalpha(word[i])) {      //if the charactor is a letter then convert it to lower case
             char lowerChar = tolower(word[i]); 
             temp[j] = lowerChar;               
             j++;                               
@@ -32,7 +34,7 @@ void cleanWord(char* word) {
 }
 
 void addWord(char* word) {
-    // Search if the word already exists
+    // to search if the word already exists , if exitst then increase the count of that word by one 
     for (int i = 0; i < wordCount; i++) {
         if (strcmp(wordList[i].word, word) == 0) {
             wordList[i].count++;
@@ -43,23 +45,26 @@ void addWord(char* word) {
     // If new word came and array is full then we have to expand the array
     if (wordCount == capacity) {
         capacity *= 2; // double the capacity of the array
+        //then try to reallocate the array with the new larger size capacity*size of one element of wordcount struct
         WordCount* temp = realloc(wordList, capacity * sizeof(WordCount));
         if (temp == NULL) {
             printf("Memory allocation failed!\n");
-            free(wordList);  //free that allocated space
+            free(wordList);  //free that allocated space earlier if it failed
             exit(1);
         }
         wordList = temp;
     }
 
-    // Add new word to the list if that is not exists
+    // Add the new word to the list recreated above and reallocated if that is not exists already
     strcpy(wordList[wordCount].word, word);
-    wordList[wordCount].count = 1;
+    wordList[wordCount].count = 1;  
+    //as this is the first time for this new word , set the count of it as 1
     wordCount++;
 }
 
 int main() {
-    wordList = malloc(capacity * sizeof(WordCount));    //dynamically allocating memory using a pointer
+    wordList = malloc(capacity * sizeof(WordCount));    
+    //dynamically allocating memory using a pointer becuase the size of the text file word count is not known
     if (wordList == NULL) {
         printf("Memory allocation failed!\n");
         return 1;

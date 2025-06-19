@@ -19,13 +19,13 @@ typedef struct {
     int capacity;       // current capacity of words array
 } WordList;
 
-// Dynamic array for all words read from file
+// Dynamicarray for all words read from the file
 char (*allWords)[MAX_WORD_LEN] = NULL;
 int totalWords = 0;
 int allWordsCapacity = 10000;  // initial capacity, will grow as needed
 
-// Array of thread-local WordLists
-WordList threadWordLists[NUM_THREADS];
+
+WordList threadWordLists[NUM_THREADS];        //One WordList per thread for parallel local word counts
 
 // Global WordList to hold merged results
 WordList globalWordList;
@@ -43,7 +43,7 @@ void cleanWord(char* word) {
     strcpy(word, temp);
 }
 
-// Initialize WordList with a given capacity
+// Initialize WordList with above capacity 1000
 void initWordList(WordList* list, int capacity) {
     list->words = malloc(capacity * sizeof(WordCount));
     if (!list->words) {
@@ -64,7 +64,7 @@ void freeWordList(WordList* list) {
     list->capacity = 0;
 }
 
-// Ensure capacity for one more WordCount entry in WordList
+// ifcapacity for one more WordCount entry in WordList
 void ensureCapacity(WordList* list) {
     if (list->count >= list->capacity) {
         int newCapacity = list->capacity * 2;
@@ -79,15 +79,15 @@ void ensureCapacity(WordList* list) {
     }
 }
 
-// Add or update word in a given WordList (linear search, could be improved)
+// Add word in a given WordList
 void addWordToList(WordList* list, const char* word) {
     for (int i = 0; i < list->count; i++) {
         if (strcmp(list->words[i].word, word) == 0) {
-            list->words[i].count++;
+            list->words[i].count++;  // if the word already exists in the list
             return;
         }
     }
-    // Add new word
+    // Add new word if not exists and its count is 1
     ensureCapacity(list);
     strcpy(list->words[list->count].word, word);
     list->words[list->count].count = 1;
@@ -100,12 +100,12 @@ void mergeWordLists(WordList* dest, WordList* src) {
         int found = 0;
         for (int j = 0; j < dest->count; j++) {
             if (strcmp(dest->words[j].word, src->words[i].word) == 0) {
-                dest->words[j].count += src->words[i].count;
+                dest->words[j].count += src->words[i].count;     // if the word is found globally already exits
                 found = 1;
                 break;
             }
         }
-        if (!found) {
+        if (!found) {    // if the thread comes with a new word 
             ensureCapacity(dest);
             strcpy(dest->words[dest->count].word, src->words[i].word);
             dest->words[dest->count].count = src->words[i].count;
@@ -168,23 +168,23 @@ int main() {
     #pragma omp parallel
     {
         int tid = omp_get_thread_num();
-        WordList* localList = &threadWordLists[tid];
+        WordList* localList = &threadWordLists[tid]; //threadWordLists[tid] is each thread's local word counter
         localList->count = 0;
 
-        #pragma omp for schedule(static)
+        #pragma omp for schedule(static)     //divide the loop iterations evenly among threads
         for (int i = 0; i < totalWords; i++) {
             addWordToList(localList, allWords[i]);
         }
     }
 
-    // Merge thread-local lists into the global list (sequentially)
+    // Merge thread local lists into the global list 
     for (int i = 0; i < NUM_THREADS; i++) {
         mergeWordLists(&globalWordList, &threadWordLists[i]);
     }
 
     double end = omp_get_wtime();
 
-    // Output results
+   
     printf("Word Frequencies:\n");
     for (int i = 0; i < globalWordList.count; i++) {
         printf("%s: %d\n", globalWordList.words[i].word, globalWordList.words[i].count);
@@ -192,7 +192,7 @@ int main() {
 
     printf("Execution time: %f seconds\n", end - start);
 
-    // Free allocated memory
+
     for (int i = 0; i < NUM_THREADS; i++) {
         freeWordList(&threadWordLists[i]);
     }
