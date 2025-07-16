@@ -17,12 +17,13 @@ int wordCount = 0;
 int capacity = 1000; // initial capacity of the dynamic array
 
 
-//cleaning the text file ---> convert all in to lower case
+//cleaning the text file ---> convert all in to lower case and consider only letters
 void cleanWord(char* word) {
     int i, j = 0;
     char temp[MAX_WORD_LEN];      // using a new temporary array for storing the cleaned word
     for (i = 0; word[i] != '\0'; i++) {
-        if (isalpha(word[i])) {      //if the charactor is a letter then convert it to lower case
+        if (isalpha(word[i])) {      
+            //if the charactor is a letter then convert it to lower case
             char lowerChar = tolower(word[i]); 
             temp[j] = lowerChar;               
             j++;                               
@@ -34,7 +35,8 @@ void cleanWord(char* word) {
 }
 
 void addWord(char* word) {
-    // to search if the word already exists , if exitst then increase the count of that word by one 
+    // to search if the word already exists , if exitst then increase the 
+    // count of that word by one 
     for (int i = 0; i < wordCount; i++) {
         if (strcmp(wordList[i].word, word) == 0) {
             wordList[i].count++;
@@ -64,7 +66,8 @@ void addWord(char* word) {
 
 int main() {
     wordList = malloc(capacity * sizeof(WordCount));    
-    //dynamically allocating memory using a pointer becuase the size of the text file word count is not known
+    //dynamically allocating memory using a pointer becuase the size of the text file 
+    //word count is not known
     if (wordList == NULL) {
         printf("Memory allocation failed!\n");
         return 1;
@@ -97,6 +100,20 @@ int main() {
 
     double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
     printf("\nExecution time: %.6f seconds\n", time_spent);
+
+    // Save the printed output to a file after printing
+FILE* outputFile = fopen("word_frequencies.txt", "w");
+if (outputFile != NULL) {
+    fprintf(outputFile, "Word Frequencies:\n");
+    for (int i = 0; i < wordCount; i++) {
+        fprintf(outputFile, "%s: %d\n", wordList[i].word, wordList[i].count);
+    }
+    fclose(outputFile);
+    printf("Word frequencies saved to 'word_frequencies.txt'\n");
+} else {
+    perror("Error opening file for writing");
+}
+
 
     free(wordList);
     return 0;

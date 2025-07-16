@@ -193,6 +193,20 @@ int main() {
     printf("Execution time: %f seconds\n", end - start);
 
 
+    // Save the printed output to a file
+FILE *outputFile = fopen("word_frequencies._output_openmp.txt", "w");
+if (outputFile != NULL) {
+    fprintf(outputFile, "Word Frequencies:\n");
+    for (int i = 0; i < globalWordList.count; i++) {
+        fprintf(outputFile, "%s: %d\n", globalWordList.words[i].word, globalWordList.words[i].count);
+    }
+    fclose(outputFile);
+    printf("Output also saved to 'word_frequencies.txt'\n");
+} else {
+    perror("Error opening file for writing");
+}
+
+
     for (int i = 0; i < NUM_THREADS; i++) {
         freeWordList(&threadWordLists[i]);
     }
